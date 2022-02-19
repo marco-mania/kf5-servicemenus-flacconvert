@@ -1,0 +1,54 @@
+#
+#  Part of kde-servicemenus-flacconvert
+#  Copyright (c) since 2021 by Marco Nelles <marco at maniatek dot de>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+[Desktop Entry]
+Actions=convert_mp3;convert_opus;_SEPARATOR_;convert_custom;
+MimeType=audio/flac
+Name=flac convert service menu
+ServiceTypes=KonqPopupMenu/Plugin,audio/flac
+TryExec=flacconvert-kdialog
+Type=Service
+X-KDE-Priority=TopLevel
+X-KDE-Submenu=Convert
+X-KDE-Submenu[de]=Umwandlung
+
+################################################################################
+
+[Desktop Action convert_mp3]
+Exec=flacconvert-kdialog convert mp3 320 %F
+Icon=audio-mp3
+Terminal=false
+Type=Application
+Name=Convert to MP3 (320k)
+Name[de]=In MP3 (320k) umwandeln
+
+[Desktop Action convert_opus]
+Exec=flacconvert-kdialog convert opus 128 %F
+Icon=audio-opus
+Terminal=false
+Type=Application
+Name=Convert to Opus (128k)
+Name[de]=In Opus (128k) umwandeln
+
+[Desktop Action convert_custom]
+Exec=flacconvert-kdialog convert custom %F
+Icon=audio-opus
+Terminal=false
+Type=Application
+Name=Convert to ...
+Name[de]=Benutzerdefinierte Umwandlung...

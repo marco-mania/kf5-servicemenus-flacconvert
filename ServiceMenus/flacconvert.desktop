@@ -30,7 +30,7 @@ X-KDE-Submenu[de]=Umwandlung
 ################################################################################
 
 [Desktop Action convert_mp3]
-Exec=flacconvert-kdialog convert mp3 V0 %F
+Exec=flacconvert-kdialog convert mp3 0 %F
 Icon=audio-mp3
 Terminal=false
 Type=Application

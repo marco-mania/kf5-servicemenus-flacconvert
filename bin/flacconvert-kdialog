@@ -60,7 +60,7 @@ Examples:
     msg_common_lame_not_found_text="LAME not found."
     msg_common_opus_not_found_text="opus-tools not found."
 
-    msg_common_abort="Operation interrupted by the user."
+    msg_common_abort="Operation interrupted by user."
     msg_common_overwrite_text="In case the images to be saved have the same name as those to be processed.\nDo you want to overwrite them?"
     msg_common_progress_text="Processing file \$i of \$file_count \(\$basename_file\)"
     msg_common_finish_ok="Done."
@@ -175,27 +175,21 @@ iterate_files () {
     fi
 
     file_count=$#
-    dbus_ref=$(kdialog --icon configure --title "${!msg_title}" --progressbar "${msg_common_start}" $file_count)
-    qdbus $dbus_ref showCancelButton true
-    i=0
+    dbus_ref=$(kdialog --icon configure --title "${msg_title}" --progressbar "${msg_common_start}" $file_count)
+    qdbus $dbus_ref org.kde.kdialog.ProgressDialog.showCancelButton true
+    i=1
 
-    for file in "$@"; do
+    while [[ "false" == "$(qdbus $dbus_ref org.kde.kdialog.ProgressDialog.wasCancelled 2>/dev/null)" && $i -le $file_count ]]; do
 
+        local file="${!i}"
+        echo $file
         local basename_file="$(basename "$file")"
 
-        ## Check if cancel button has been pushed
-        if [ "$(qdbus $dbus_ref wasCancelled)" = "true" ]; then
-            qdbus $dbus_ref close && "${kdialog_bin}" --title "${!msg_title}" --passivepopup "${msg_common_abort}" 5
-            exit 2
-        fi
-
-        i=$(($i + 1))
-
         if [ ! -f "${file}" ]; then
-            "${kdialog_bin}" --title --icon configure "${!msg_title}" --error "$(eval echo "${msg_common_file_not_found}")"
+            "${kdialog_bin}" --title --icon configure "${msg_title}" --error "$(eval echo "${msg_common_file_not_found}")"
             break
         fi
-        qdbus $dbus_ref setLabelText "$(eval echo "${msg_common_progress_text}")"
+        qdbus $dbus_ref org.kde.kdialog.ProgressDialog.setLabelText "$(eval echo "${msg_common_progress_text}")"
 
         local msg_finish_title=msg_${command}_finish_title
         msg_finish_title="$(eval echo ${!msg_finish_title})"
@@ -204,14 +198,18 @@ iterate_files () {
         if [ $rc -eq 0 ]; then
             "${kdialog_bin}" --title "${msg_finish_title}" --passivepopup "${msg_common_finish_ok}" 5
         else
-            { qdbus $dbus_ref close; "${kdialog_bin}" --icon configure --title "${msg_finish_title}" --detailederror "${msg_common_finish_error}" "${OUTPUT}"; exit 2; }
+            qdbus $dbus_ref close
+            "${kdialog_bin}" --icon configure --title "${msg_finish_title}" --detailederror "${msg_common_finish_error}" "${OUTPUT}"
+            exit 1
         fi
 
         qdbus $dbus_ref org.freedesktop.DBus.Properties.Set org.kde.kdialog.ProgressDialog value $i
 
+        i=$(($i + 1))
+
     done
 
-    qdbus $dbus_ref close
+    qdbus $dbus_ref close 2>/dev/null
 
 }
 
@@ -223,14 +221,14 @@ init_convert () {
     shift
 
     if [ "${value}" == "custom" ]; then
-        FORMAT=$("${kdialog_bin}" --icon configure --title "${!msg_title}" --combobox "${msg_convert_format_input_text}" "mp3" "opus" --default "mp3") || \
+        FORMAT=$("${kdialog_bin}" --icon configure --title "${msg_title}" --combobox "${msg_convert_format_input_text}" "mp3" "opus" --default "mp3") || \
             { "${kdialog_bin}" --title "${!msg_title}" --passivepopup "${msg_common_abort}" 5 && exit 2; }
         if [ "$FORMAT" == "mp3" ]; then
-          BITRATE=$("${kdialog_bin}" --icon configure --title "${!msg_title}" --combobox "${msg_convert_qualitypreset_input_text}" "7 (~100 kbps)" "6 (~115 kbps)" "5 (~130 kbps)" "4 (~165 kbps)" "3 (~175 kbps)" "2 (~190 kbps)(*)" "1 (~225 kbps)" "0 (~245 kbps)" --default "2 (~190 kbps)(*)") || \
+          BITRATE=$("${kdialog_bin}" --icon configure --title "${msg_title}" --combobox "${msg_convert_qualitypreset_input_text}" "7 (~100 kbps)" "6 (~115 kbps)" "5 (~130 kbps)" "4 (~165 kbps)" "3 (~175 kbps)" "2 (~190 kbps)(*)" "1 (~225 kbps)" "0 (~245 kbps)" --default "2 (~190 kbps)(*)") || \
             { "${kdialog_bin}" --title "${!msg_title}" --passivepopup "${msg_common_abort}" 5 && exit 2; }
           BITRATE=${BITRATE:0:1}
         else
-          BITRATE=$("${kdialog_bin}" --icon configure --title "${!msg_title}" --inputbox "${msg_convert_bitrate_input_text}") || \
+          BITRATE=$("${kdialog_bin}" --icon configure --title "${msg_title}" --inputbox "${msg_convert_bitrate_input_text}") || \
             { "${kdialog_bin}" --title "${!msg_title}" --passivepopup "${msg_common_abort}" 5 && exit 2; }
         fi
     else

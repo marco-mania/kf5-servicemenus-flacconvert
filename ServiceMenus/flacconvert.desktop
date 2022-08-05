@@ -30,20 +30,20 @@ X-KDE-Submenu[de]=Umwandlung
 ################################################################################
 
 [Desktop Action convert_mp3]
-Exec=flacconvert-kdialog convert mp3 320 %F
+Exec=flacconvert-kdialog convert mp3 V0 %F
 Icon=audio-mp3
 Terminal=false
 Type=Application
-Name=Convert to MP3 (320k)
-Name[de]=In MP3 (320k) umwandeln
+Name=Convert to MP3
+Name[de]=In MP3 umwandeln
 
 [Desktop Action convert_opus]
 Exec=flacconvert-kdialog convert opus 128 %F
 Icon=audio-opus
 Terminal=false
 Type=Application
-Name=Convert to Opus (128k)
-Name[de]=In Opus (128k) umwandeln
+Name=Convert to Opus
+Name[de]=In Opus umwandeln
 
 [Desktop Action convert_custom]
 Exec=flacconvert-kdialog convert custom %F

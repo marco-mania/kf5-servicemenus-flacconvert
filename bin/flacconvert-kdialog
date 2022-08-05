@@ -32,18 +32,25 @@ Commands:
     help, -h, --help
         Show this help text
 
-    convert <\$format|custom> [\$bitrate]
+    convert <\$format|custom> [\$bitrate|\$quality_preset]
         Convert audiofile(s) to the desired format. Format can be MP3 or Opus.
         Bitrate is kbps. If you select custom format you must not set the
         bitrate.
-        Bitrates for MP3: 8, 16, 24, 32, 40, 48, 64, 80, 96, 112, 128, 160,
-            192, 224, 256, or 320
-        Bitrate range for Opus: 5-510
+        Quality presets for LAME:
+          7 (~100 kbps)
+          6 (~115 kbps)
+          5 (~130 kbps, transparent for a majority users)
+          4 (~165 kbps, transparent for most users)
+          3 (~175 kbps)
+          2 (~190 kbps, transparent)
+          1 (~225 kbps)
+          0 (~245 kbps)
+        Bitrate range for Opus (kbps): 5-510
 
 Examples:
-    ${PROGNAME} mp3 320 /path/to/song1.flac
-    ${PROGNAME} opus 128 /path/to/song1.flac /path/to/song2.flac
-    ${PROGNAME} custom /path/to/song1.flac /path/to/song2.flac
+    ${PROGNAME} convert mp3 0 /path/to/song1.flac
+    ${PROGNAME} convert opus 128 /path/to/song1.flac /path/to/song2.flac
+    ${PROGNAME} convert custom /path/to/song1.flac /path/to/song2.flac
 "
 
     msg_common_dependency_check_failed_title="Dependency check failed"
@@ -64,6 +71,7 @@ Examples:
     msg_convert_title="Convert audio file"
     msg_convert_format_input_text="Choose the format you want:"
     msg_convert_bitrate_input_text="Choose the bitrate in kbps:"
+    msg_convert_qualitypreset_input_text="Choose the quality preset:\n(*) transparent"
     msg_convert_finish_title="Convertion of \$basename_file"
 
 }
@@ -140,9 +148,9 @@ exec_convert () {
     local cover_switch=""
     if [ "$format" == "mp3" ]; then
         if [ -f "${cover_filename}" ]; then
-            "${flac_bin}" -s -c -d "${inputfile}" | "${lame_bin}" -b${bitrate} --add-id3v2 --pad-id3v2 --ignore-tag-errors --ta "${artist}" --tt "${title}" --tl "${album}"  --tg "${genre:-12}" --tn "${tracknum:-0}" --ty "${date}" --ti "${cover_filename}" - "${dir}/${base}.mp3"
+            "${flac_bin}" -s -c -d "${inputfile}" | "${lame_bin}" -V ${bitrate} --add-id3v2 --pad-id3v2 --ignore-tag-errors --ta "${artist}" --tt "${title}" --tl "${album}"  --tg "${genre:-12}" --tn "${tracknum:-0}" --ty "${date}" --ti "${cover_filename}" - "${dir}/${base}.mp3"
         else
-            "${flac_bin}" -s -c -d "${inputfile}" | "${lame_bin}" -b${bitrate} --add-id3v2 --pad-id3v2 --ignore-tag-errors --ta "${artist}" --tt "${title}" --tl "${album}"  --tg "${genre:-12}" --tn "${tracknum:-0}" --ty "${date}" - "${dir}/${base}.mp3"
+            "${flac_bin}" -s -c -d "${inputfile}" | "${lame_bin}" -V ${bitrate} --add-id3v2 --pad-id3v2 --ignore-tag-errors --ta "${artist}" --tt "${title}" --tl "${album}"  --tg "${genre:-12}" --tn "${tracknum:-0}" --ty "${date}" - "${dir}/${base}.mp3"
         fi
     elif [ "$format" == "opus" ]; then
         if [ -f "${cover_filename}" ]; then
@@ -217,8 +225,14 @@ init_convert () {
     if [ "${value}" == "custom" ]; then
         FORMAT=$("${kdialog_bin}" --icon configure --title "${!msg_title}" --combobox "${msg_convert_format_input_text}" "mp3" "opus" --default "mp3") || \
             { "${kdialog_bin}" --title "${!msg_title}" --passivepopup "${msg_common_abort}" 5 && exit 2; }
-        BITRATE=$("${kdialog_bin}" --icon configure --title "${!msg_title}" --inputbox "${msg_convert_bitrate_input_text}") || \
+        if [ "$FORMAT" == "mp3" ]; then
+          BITRATE=$("${kdialog_bin}" --icon configure --title "${!msg_title}" --combobox "${msg_convert_qualitypreset_input_text}" "7 (~100 kbps)" "6 (~115 kbps)" "5 (~130 kbps)" "4 (~165 kbps)" "3 (~175 kbps)" "2 (~190 kbps)(*)" "1 (~225 kbps)" "0 (~245 kbps)" --default "2 (~190 kbps)(*)") || \
             { "${kdialog_bin}" --title "${!msg_title}" --passivepopup "${msg_common_abort}" 5 && exit 2; }
+          BITRATE=${BITRATE:0:1}
+        else
+          BITRATE=$("${kdialog_bin}" --icon configure --title "${!msg_title}" --inputbox "${msg_convert_bitrate_input_text}") || \
+            { "${kdialog_bin}" --title "${!msg_title}" --passivepopup "${msg_common_abort}" 5 && exit 2; }
+        fi
     else
         FORMAT="${value}"
         BITRATE="${1}"

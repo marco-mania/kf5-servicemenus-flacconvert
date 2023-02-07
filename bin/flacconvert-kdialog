@@ -182,7 +182,6 @@ iterate_files () {
     while [[ "false" == "$(qdbus $dbus_ref org.kde.kdialog.ProgressDialog.wasCancelled 2>/dev/null)" && $i -le $file_count ]]; do
 
         local file="${!i}"
-        echo $file
         local basename_file="$(basename "$file")"
 
         if [ ! -f "${file}" ]; then

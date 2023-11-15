@@ -57,9 +57,8 @@ Examples:
 function load_lang() {
 
     case $1 in
-        en_US)
-            ;;
-        default)
+        en_US | *)
+
             msg_common_dependency_check_failed_title="Dependency check failed"
             msg_common_kdialog_not_found_text="kdialog not found. Assuming KDE environment."
             msg_common_flac_not_found_text="FLAC not found."

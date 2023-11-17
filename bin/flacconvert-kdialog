@@ -291,7 +291,7 @@ help | -h | --help)
     exit 0
     ;;
 convert)
-    msg_title="$(msg_convert_title)"
+    msg_title="$msg_convert_title"
     init_convert "${@}"
     ;;
 *)

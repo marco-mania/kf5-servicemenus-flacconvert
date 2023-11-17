@@ -253,14 +253,14 @@ init_convert () {
 
     if [ "${value}" == "custom" ]; then
         FORMAT=$("${kdialog_bin}" --icon configure --title "${msg_title}" --combobox "${msg_convert_format_input_text}" "mp3" "opus" --default "mp3") || \
-            { "${kdialog_bin}" --title "${!msg_title}" --passivepopup "${msg_common_abort}" 5 && exit 2; }
+            { "${kdialog_bin}" --title "${msg_title}" --passivepopup "${msg_common_abort}" 5 && exit 2; }
         if [ "$FORMAT" == "mp3" ]; then
           BITRATE=$("${kdialog_bin}" --icon configure --title "${msg_title}" --combobox "${msg_convert_qualitypreset_input_text}" "7 (~100 kbps)" "6 (~115 kbps)" "5 (~130 kbps)" "4 (~165 kbps)" "3 (~175 kbps)" "2 (~190 kbps)(*)" "1 (~225 kbps)" "0 (~245 kbps)" --default "2 (~190 kbps)(*)") || \
-            { "${kdialog_bin}" --title "${!msg_title}" --passivepopup "${msg_common_abort}" 5 && exit 2; }
+            { "${kdialog_bin}" --title "${msg_title}" --passivepopup "${msg_common_abort}" 5 && exit 2; }
           BITRATE=${BITRATE:0:1}
         else
           BITRATE=$("${kdialog_bin}" --icon configure --title "${msg_title}" --inputbox "${msg_convert_bitrate_input_text}") || \
-            { "${kdialog_bin}" --title "${!msg_title}" --passivepopup "${msg_common_abort}" 5 && exit 2; }
+            { "${kdialog_bin}" --title "${msg_title}" --passivepopup "${msg_common_abort}" 5 && exit 2; }
         fi
     else
         FORMAT="${value}"
